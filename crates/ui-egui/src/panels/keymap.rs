@@ -79,11 +79,13 @@ fn menu_text(sc: &str, mac: bool) -> String {
 
 fn row(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, b: &Bindable, sc: Option<&str>, mac: bool) {
     let changed = app.ui.settings.keymap.contains_key(b.id);
-    let mut name = RichText::new(crate::i18n::tr(b.label)).color(t.text);
+    // in the Library grids the Presets key picks and advances instead (`shortcuts::handle`)
+    let grid_pick = b.id == "panel.presets" && shortcuts::library_grid(app);
+    let mut name = RichText::new(crate::i18n::tr(if grid_pick { "Flag as Pick" } else { b.label })).color(t.text);
     if changed {
         name = name.strong();
     }
-    ui.label(name).on_hover_text(b.id);
+    ui.label(name).on_hover_text(if grid_pick { "photo.flag" } else { b.id });
     let recording = app.recording_shortcut.as_deref() == Some(b.id);
     let text = if recording {
         RichText::new(crate::i18n::tr("Press keys…")).color(egui::Color32::WHITE)
